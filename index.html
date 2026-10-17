@@ -156,7 +156,7 @@
   </div>
 
   <div class="marquee-bar">
-    <marquee behavior="scroll" direction="left" scrollamount="5">
+    <marquee behavior="scroll" direction="left" scrollamount="8">
       <span>*** WELCOME TO SJR's NEWCENTER ***</span>
       <span>** WISHING YOU ALL A VERY HAPPY PUJA HOLIDAYS **</span>
       <span>NOTHING TO SEE HERE YET! AS I AM MAKING PAGES AND THINKING WHAT TO MAKE</span>
@@ -167,11 +167,19 @@
   </div>
 
   <div class="midi-player">
-    <button id="midiPlay">▶ PLAY</button>
-    <button id="midiStop">■ STOP</button>
-    <div class="track" id="midiTrack">♪ pixelranger_theme.mid</div>
-    <span id="midiStatus">STOPPED</span>
-  </div>
+  <button id="midiPlay">▶ PLAY</button>
+  <button id="midiStop">■ STOP</button>
+
+  <select class="track" id="midiTrack">
+    <option value="theme">♪ pixelranger_theme.mid</option>
+    <option value="night">♪ night_drive.mid</option>
+    <option value="arcade">♪ arcade_loop.mid</option>
+    <option value="space"> space_shooter.mid </option>
+  </select>
+
+  <span id="midiStatus">STOPPED</span>
+</div>
+
 
   <table class="main-table"><tr>
     <td class="sidebar">
@@ -329,7 +337,7 @@
         <div class="panel">
           <div class="panel-title">GAME CENTER <span class="new-tag">NEW!</span></div>
           <div class="panel-body">
-            <p>Play our collection of retro HTML5 games right in your browser. No downloads, no plugins — just pure 8-bit fun!</p>
+            <p>Play our collection of retro HTML5 games right in your browser. No downloads, no plugins, just pure 8-bit fun!</p>
             <div style="margin-top:10px;">
               <a href="gamecenter.html" style="display:inline-block;background:#000066;border:2px outset #6666ff;color:#00ffff;padding:6px 12px;font-weight:bold;margin-right:6px;">▶ OPEN GAME CENTER</a>
               <a href="paddlegame.html" style="display:inline-block;background:#000066;border:2px outset #6666ff;color:#00ffff;padding:6px 12px;font-weight:bold;">▶ PLAY RETRO ARCADE</a>
@@ -561,7 +569,67 @@
     renderGB();
     alert('Thanks for signing!');
   });
+  const playlists = {
+  theme: [262, 294, 330, 349, 392, 440, 494, 523, 494, 440, 392, 349, 330, 294, 262, 0],
+  night: [220, 262, 330, 392, 330, 262, 220, 0],
+  arcade: [392, 392, 523, 659, 523, 392, 330, 0],
+  space:[
+    62, 65, 69, 73, 78, 82, 87, 92, 98, 104, 110, 117,
+    123, 131, 139, 147, 156, 165, 175, 185, 196, 208,
+    220, 233, 247, 262, 277, 294, 311, 330, 350, 370,
+    392, 415, 440, 466, 494, 523, 554, 587, 622, 659,
+    698, 740, 784, 831, 880, 932, 988, 1047, 1109, 1175,
+    1245, 1319, 1397, 1480, 1568, 1661, 1760, 1865, 1976,
+    2093, 2217, 2349, 2490, 2637, 2794, 2960, 3136, 3322,
+    3520, 3730, 3951, 4186]
+};
 
+let audioCtx = null;
+let midiPlaying = false;
+let midiTimer = null;
+let mi = 0;
+
+function playNote(freq) {
+  if (!audioCtx || freq === 0) return;
+
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = "square";
+  o.frequency.value = freq;
+  g.gain.value = 0.06;
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
+  o.stop(audioCtx.currentTime + 0.2);
+}
+
+document.getElementById("midiPlay").addEventListener("click", () => {
+  if (midiPlaying) return;
+
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  midiPlaying = true;
+  document.getElementById("midiStatus").textContent = "PLAYING";
+  mi = 0;
+
+  midiTimer = setInterval(() => {
+    const track = document.getElementById("midiTrack").value;
+    const melody = playlists[track];
+    playNote(melody[mi % melody.length]);
+    mi++;
+  }, 220);
+});
+
+document.getElementById("midiStop").addEventListener("click", () => {
+  midiPlaying = false;
+  clearInterval(midiTimer);
+  midiTimer = null;
+  document.getElementById("midiStatus").textContent = "STOPPED";
+});
+/*
   let audioCtx=null, midiPlaying=false, midiTimer=null;
   const melody=[262,294,330,349,392,440,494,523,494,440,392,349,330,294,262,0];
   let mi=0;
@@ -585,7 +653,7 @@
   document.getElementById('midiStop').addEventListener('click',()=>{
     midiPlaying=false; clearInterval(midiTimer); midiTimer=null;
     document.getElementById('midiStatus').textContent='STOPPED';
-  });
+  });*/
 })();
 </script>
 </body>
