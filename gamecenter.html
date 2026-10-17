@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>RETRO ARCADE HUB</title>
+<meta name="description" content="A collection of retro HTML games. Play in your browser." />
+<style>
+  :root{--bg:#0a0a12;--panel:#12121f;--crt:#0f380f;--phosphor:#9bbc0f;--neon:#ff2d95;--cyan:#00e5ff;--amber:#ffb347;--text:#e8e8e8;--muted:#9a9a9a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Courier New',monospace;overflow-x:hidden;}
+  body{display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px;}
+  .monitor{width:min(100%,1100px);background:linear-gradient(180deg,#2a2a34,#1a1a24);border-radius:28px;padding:22px 22px 28px;box-shadow:0 40px 80px rgba(0,0,0,0.8),inset 0 2px 4px rgba(255,255,255,0.08),inset 0 -4px 10px rgba(0,0,0,0.5);position:relative;}
+  .monitor::before{content:'';position:absolute;top:18px;right:22px;width:10px;height:10px;border-radius:50%;background:#ff3030;box-shadow:0 0 8px #ff3030,0 0 16px #ff3030;animation:blink 1.6s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.35;}}
+  .bezel{background:#05050a;border-radius:14px;padding:14px;box-shadow:inset 0 0 0 2px #000,inset 0 0 40px rgba(0,0,0,0.9);}
+  .screen{position:relative;background:var(--crt);border-radius:8px;overflow:hidden;min-height:60vh;box-shadow:inset 0 0 60px rgba(0,0,0,0.6);}
+  .screen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:3;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0.16) 0px,rgba(0,0,0,0.16) 1px,transparent 1px,transparent 3px);mix-blend-mode:multiply;}
+  .screen::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:4;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.6) 100%);}
+  .bloom{position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 80px rgba(155,188,15,0.12);mix-blend-mode:screen;}
+  .screen-inner{position:relative;z-index:1;padding:24px 20px 32px;}
+  .title-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px dashed rgba(155,188,15,0.4);padding-bottom:14px;margin-bottom:18px;}
+  .title-bar h1{font-size:clamp(1.4rem,4vw,2.4rem);letter-spacing:4px;color:var(--phosphor);text-shadow:0 0 8px var(--phosphor),0 0 16px var(--phosphor);}
+  .title-bar .sub{font-size:0.75rem;color:var(--muted);letter-spacing:2px;}
+  .marquee{width:100%;overflow:hidden;border:1px solid rgba(155,188,15,0.3);padding:6px 0;margin-bottom:18px;background:rgba(0,0,0,0.3);}
+  .marquee span{display:inline-block;white-space:nowrap;padding-left:100%;animation:scroll 18s linear infinite;color:var(--amber);font-size:0.85rem;letter-spacing:2px;}
+  @keyframes scroll{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+  .toolbar input,.toolbar select{background:#0a1a0a;color:var(--phosphor);border:1px solid var(--phosphor);border-radius:6px;padding:8px 12px;font-family:inherit;font-size:0.85rem;outline:none;}
+  .toolbar input{flex:1;min-width:180px;}
+  .games{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+  .game-card{background:rgba(0,0,0,0.35);border:1px solid rgba(155,188,15,0.35);border-radius:10px;padding:14px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s;text-decoration:none;color:inherit;display:block;}
+  .game-card:hover,.game-card:focus{transform:translateY(-3px);border-color:var(--neon);box-shadow:0 0 14px var(--neon),0 0 28px rgba(255,45,149,0.25);}
+  .game-card .name{font-size:1rem;color:var(--phosphor);letter-spacing:1px;margin-bottom:4px;text-shadow:0 0 4px var(--phosphor);}
+  .game-card .desc{font-size:0.72rem;color:var(--muted);line-height:1.4;}
+  .game-card .tag{display:inline-block;margin-top:8px;font-size:0.65rem;padding:2px 6px;border:1px solid var(--cyan);color:var(--cyan);border-radius:4px;letter-spacing:1px;}
+  .empty{color:var(--muted);text-align:center;padding:40px 0;font-size:0.9rem;}
+  .footer{margin-top:24px;font-size:0.7rem;color:var(--muted);text-align:center;letter-spacing:1px;}
+  .footer a{color:var(--cyan);}
+  @media (max-width:600px){.monitor{padding:14px 12px 18px;border-radius:18px;}.screen-inner{padding:16px 12px 22px;}.games{grid-template-columns:1fr;}.title-bar h1{letter-spacing:2px;}}
+  .screen{animation:flicker 0.4s ease-out;}
+  @keyframes flicker{0%{opacity:0;}40%{opacity:0.6;}100%{opacity:1;}}
+</style>
+</head>
+<body>
+<div class="monitor">
+  <div class="bezel">
+    <div class="screen">
+      <div class="bloom"></div>
+      <div class="screen-inner">
+        <div class="title-bar">
+          <div><h1>RETRO ARCADE HUB</h1><div class="sub">// HTML5 GAME COLLECTION</div></div>
+          <div class="sub" id="count">0 GAMES</div>
+        </div>
+        <div class="marquee"><span>*** INSERT COIN *** WELCOME TO THE ARCADE *** SELECT A GAME TO PLAY *** ALL GAMES RUN IN YOUR BROWSER ***</span></div>
+        <div class="toolbar">
+          <input type="text" id="search" placeholder="SEARCH GAMES..." />
+          <select id="filter"><option value="all">ALL</option></select>
+        </div>
+        <div class="games" id="games"></div>
+        <div class="empty" id="empty" style="display:none;">NO GAMES FOUND</div>
+        <div class="footer">Hosted on GitHub Pages &bull; <a href="index.html">Back to PixelRanger</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const DEFAULT_GAMES = [
+    {file:'paddlegame.html', name:'RETRO ARCADE', desc:'Multi-game handheld: Paddle, Breakout, Snake. GameBoy style.', tag:'ARCADE'},
+  ];
+  const gamesEl=document.getElementById('games');
+  const emptyEl=document.getElementById('empty');
+  const countEl=document.getElementById('count');
+  const searchEl=document.getElementById('search');
+  const filterEl=document.getElementById('filter');
+  let games=[]; let activeTag='all';
+  function render(){
+    const q=searchEl.value.trim().toLowerCase();
+    const filtered=games.filter(g=>(!q||g.name.toLowerCase().includes(q)||(g.desc||'').toLowerCase().includes(q))&&(activeTag==='all'||g.tag===activeTag));
+    gamesEl.innerHTML='';
+    emptyEl.style.display=filtered.length?'none':'block';
+    filtered.forEach(g=>{
+      const a=document.createElement('a');
+      a.className='game-card'; a.href=g.file;
+      a.innerHTML='<div class="name">'+escapeHtml(g.name)+'</div><div class="desc">'+escapeHtml(g.desc||'')+'</div>'+(g.tag?'<span class="tag">'+escapeHtml(g.tag)+'</span>':'');
+      gamesEl.appendChild(a);
+    });
+    countEl.textContent=filtered.length+' / '+games.length+' GAMES';
+  }
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function buildFilter(){[...new Set(games.map(g=>g.tag).filter(Boolean))].forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;filterEl.appendChild(o);});}
+  async function loadGames(){
+    try{const res=await fetch('games.json',{cache:'no-store'});if(res.ok){const data=await res.json();if(Array.isArray(data)&&data.length){games=data;return;}if(data&&Array.isArray(data.games)){games=data.games;return;}}}catch(e){}
+    games=DEFAULT_GAMES.slice();
+  }
+  searchEl.addEventListener('input',render);
+  filterEl.addEventListener('change',e=>{activeTag=e.target.value;render();});
+  loadGames().then(()=>{buildFilter();render();});
+})();
+</script>
+</body>
+</html>

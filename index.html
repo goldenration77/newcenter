@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PixelRanger - Home of Pixel Art &amp; Retro Games</title>
+<meta name="description" content="PixelRanger - a community for pixel artists and retro game developers since 2001." />
+<meta name="keywords" content="pixel art, retro games, 8-bit, 16-bit, game development, spriting" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{min-height:100%;}
+  body{
+    background:#000033;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(0,0,80,0.6) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(60,0,60,0.4) 0%, transparent 60%);
+    color:#ccccff;
+    font-family:Verdana,Arial,Helvetica,sans-serif;
+    font-size:12px;
+    line-height:1.4;
+    overflow-x:hidden;
+  }
+  a{color:#00ffff;text-decoration:underline;}
+  a:hover{color:#ffff00;text-decoration:none;}
+  a:visited{color:#ff00ff;}
+
+  #stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate;}
+  @keyframes twinkle{0%{opacity:0.2;}100%{opacity:1;}}
+
+  .page{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:8px;}
+
+  .banner{
+    background:linear-gradient(180deg,#000066 0%,#330066 50%,#660099 100%);
+    border:4px outset #9999ff;
+    padding:10px;
+    text-align:center;
+    margin-bottom:8px;
+    box-shadow:0 0 20px rgba(100,0,255,0.5);
+  }
+  .banner h1{
+    font-family:'Courier New',monospace;
+    font-size:clamp(26px,6vw,48px);
+    color:#ffff00;
+    text-shadow:3px 3px 0 #ff00ff, -1px -1px 0 #00ffff;
+    letter-spacing:4px;
+    animation:glow 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes glow{0%{text-shadow:3px 3px 0 #ff00ff,-1px -1px 0 #00ffff,0 0 10px #ffff00;}100%{text-shadow:3px 3px 0 #ff00ff,-1px -1px 0 #00ffff,0 0 25px #ffff00,0 0 40px #ff00ff;}}
+  .banner .tagline{color:#00ffff;font-size:13px;margin-top:4px;letter-spacing:2px;}
+  .banner .badges{margin-top:8px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+  .badge{background:#ffff00;color:#000033;font-size:10px;font-weight:bold;padding:2px 6px;border:2px inset #cccc00;cursor:pointer;}
+  .badge:hover{background:#00ffff;}
+
+  .marquee-bar{
+    background:#000000;border:2px inset #666699;padding:4px;margin-bottom:8px;overflow:hidden;
+  }
+  .marquee-bar marquee{color:#00ff00;font-size:12px;font-family:'Courier New',monospace;}
+  .marquee-bar marquee span{margin-right:40px;}
+
+  .main-table{width:100%;border-collapse:separate;border-spacing:6px;}
+  .sidebar{width:180px;vertical-align:top;}
+  .content{vertical-align:top;}
+
+  .panel{
+    background:#1a1a4a;
+    border:3px outset #6666cc;
+    margin-bottom:8px;
+    box-shadow:4px 4px 0 rgba(0,0,0,0.5);
+  }
+  .panel-title{
+    background:linear-gradient(90deg,#000099,#6600cc);
+    color:#ffff00;font-weight:bold;font-size:12px;padding:3px 8px;
+    border-bottom:2px solid #9999ff;
+    letter-spacing:1px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel-title .btns{display:flex;gap:3px;}
+  .panel-title .btns span{width:12px;height:12px;background:#ccccff;border:1px outset #fff;display:inline-block;font-size:8px;line-height:12px;text-align:center;color:#000;cursor:pointer;}
+  .panel-body{padding:8px;color:#ccccff;}
+
+  .nav-link{
+    display:block;padding:4px 6px;margin:2px 0;
+    background:#000066;border:2px outset #6666ff;color:#00ffff;
+    text-decoration:none;font-size:11px;font-weight:bold;
+    cursor:pointer;
+  }
+  .nav-link:hover{background:#6600cc;color:#ffff00;border-style:inset;}
+  .nav-link.active{background:#ff00ff;color:#ffff00;}
+
+  .pixel-canvas-wrap{text-align:center;margin:6px 0;}
+  #pixelCanvas{border:2px inset #9999ff;background:#000;image-rendering:pixelated;cursor:crosshair;}
+  .tool-row{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0;}
+  .tool-btn{background:#ccccff;color:#000033;border:2px outset #fff;padding:2px 8px;font-size:10px;font-weight:bold;cursor:pointer;}
+  .tool-btn:hover{background:#ffff00;}
+  .tool-btn.active{background:#ff00ff;color:#fff;border-style:inset;}
+  .color-swatch{width:18px;height:18px;border:2px outset #fff;cursor:pointer;display:inline-block;}
+  .color-swatch.active{border:2px inset #000;outline:2px solid #ffff00;}
+
+  .gb-entry{border-bottom:1px dashed #666699;padding:6px 0;margin-bottom:6px;}
+  .gb-entry .name{color:#ffff00;font-weight:bold;}
+  .gb-entry .date{color:#666699;font-size:10px;}
+  .gb-entry .msg{color:#ccccff;margin-top:2px;}
+  .gb-form input,.gb-form textarea{width:100%;background:#000033;color:#00ffff;border:2px inset #666699;padding:4px;font-family:inherit;font-size:11px;margin-bottom:4px;}
+  .gb-form button{background:#00ff00;color:#000033;border:2px outset #00cc00;padding:4px 12px;font-weight:bold;cursor:pointer;}
+  .gb-form button:hover{background:#ffff00;}
+
+  .news-item{margin-bottom:10px;padding-bottom:8px;border-bottom:1px dotted #666699;}
+  .news-date{color:#ff00ff;font-size:10px;font-weight:bold;}
+  .news-title{color:#ffff00;font-weight:bold;margin:2px 0;}
+  .news-body{color:#ccccff;}
+
+  .counter{display:inline-flex;gap:2px;background:#000;padding:4px;border:2px inset #666699;}
+  .counter span{background:#003300;color:#00ff00;font-family:'Courier New',monospace;font-size:16px;padding:0 4px;border:1px solid #006600;}
+
+  .webring{background:#ffff00;color:#000033;padding:6px;text-align:center;border:3px outset #cccc00;font-size:11px;}
+  .webring a{color:#000099;font-weight:bold;margin:0 6px;}
+
+  .footer{text-align:center;padding:12px 0;color:#666699;font-size:10px;border-top:2px dashed #666699;margin-top:8px;}
+  .footer a{color:#00ffff;}
+
+  .blink{animation:blink 1s step-end infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .new-tag{background:#ff0000;color:#ffff00;font-size:9px;font-weight:bold;padding:1px 4px;animation:blink 0.8s step-end infinite;vertical-align:super;}
+  .under-construction{background:repeating-linear-gradient(45deg,#ffff00,#ffff00 10px,#000 10px,#000 20px);color:#000;padding:8px;text-align:center;font-weight:bold;border:3px solid #ff0000;}
+
+  .trail{position:fixed;width:6px;height:6px;background:#ffff00;border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:difference;}
+
+  .midi-player{background:#c0c0c0;border:3px outset #fff;padding:6px;display:flex;align-items:center;gap:6px;font-size:10px;color:#000;}
+  .midi-player button{background:#e0e0e0;border:2px outset #fff;padding:2px 6px;cursor:pointer;font-size:10px;}
+  .midi-player button:active{border-style:inset;}
+  .midi-player .track{flex:1;background:#fff;border:2px inset #808080;padding:2px 4px;font-family:'Courier New',monospace;}
+
+  @media (max-width:720px){
+    .sidebar{display:block;width:100%;}
+    .main-table,.main-table tbody,.main-table tr,.main-table td{display:block;width:100%;}
+    .content{margin-top:8px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<div class="page">
+  <div class="banner">
+    <h1>★ PIXELRANGER ★</h1>
+    <div class="tagline">HOME OF PIXEL ART &amp; RETRO GAME DEVELOPMENT</div>
+    <div class="badges">
+      <span class="badge">EST. 2001</span>
+      <span class="badge">800x600 BEST VIEWED</span>
+      <span class="badge">NETSCAPE 4.0+</span>
+      <span class="badge">IE 5.5+</span>
+      <span class="badge new-tag">NEW!</span>
+    </div>
+  </div>
+
+  <div class="marquee-bar">
+    <marquee behavior="scroll" direction="left" scrollamount="4">
+      <span>*** WELCOME TO PIXELRANGER ***</span>
+      <span>NEW TUTORIAL: SPRITING 101 POSTED!</span>
+      <span>GUESTBOOK NOW OPEN!</span>
+      <span>CHECK OUT THE PIXEL EDITOR BELOW!</span>
+      <span>JOIN OUR WEBRING!</span>
+    </marquee>
+  </div>
+
+  <div class="midi-player">
+    <button id="midiPlay">▶ PLAY</button>
+    <button id="midiStop">■ STOP</button>
+    <div class="track" id="midiTrack">♪ pixelranger_theme.mid</div>
+    <span id="midiStatus">STOPPED</span>
+  </div>
+
+  <table class="main-table"><tr>
+    <td class="sidebar">
+      <div class="panel">
+        <div class="panel-title">NAVIGATION <span class="btns"><span>_</span><span>□</span><span>X</span></span></div>
+        <div class="panel-body">
+          <a class="nav-link active" data-section="home">🏠 HOME</a>
+          <a class="nav-link" data-section="news">📰 NEWS</a>
+          <a class="nav-link" data-section="gallery">🎨 GALLERY</a>
+          <a class="nav-link" data-section="editor">✏️ PIXEL EDITOR</a>
+          <a class="nav-link" data-section="tutorials">📚 TUTORIALS</a>
+          <a class="nav-link" data-section="guestbook">📖 GUESTBOOK</a>
+          <a class="nav-link" data-section="links">🔗 LINKS</a>
+          <a class="nav-link" data-section="games">🎮 GAME CENTER</a>
+          <a class="nav-link" data-section="about">ℹ️ ABOUT</a>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">SITE STATS</div>
+        <div class="panel-body">
+          <div>Visitors:</div>
+          <div class="counter" id="counter"></div>
+          <div style="margin-top:6px;">Online now: <span style="color:#00ff00;">3</span></div>
+          <div>Last update: <span style="color:#ffff00;">2026-10-17</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">AWARDS</div>
+        <div class="panel-body" style="text-align:center;">
+          <div style="background:#ffff00;color:#000;padding:4px;margin:4px 0;font-size:10px;font-weight:bold;">★ SITE OF THE DAY ★</div>
+          <div style="background:#00ffff;color:#000;padding:4px;margin:4px 0;font-size:10px;font-weight:bold;">★ COOL SITE AWARD ★</div>
+          <div style="background:#ff00ff;color:#fff;padding:4px;margin:4px 0;font-size:10px;font-weight:bold;">★ GOLDEN WEB AWARD ★</div>
+        </div>
+      </div>
+    </td>
+
+    <td class="content">
+      <div id="section-home" class="section">
+        <div class="panel">
+          <div class="panel-title">WELCOME! <span class="new-tag">NEW!</span></div>
+          <div class="panel-body">
+            <p>Welcome to <b style="color:#ffff00;">PixelRanger</b>, the ultimate destination for pixel artists, spriters, and retro game developers! We've been serving the community since 2001 with tutorials, tools, and a friendly guestbook.</p>
+            <p style="margin-top:6px;">Whether you're crafting 8-bit sprites for your next indie game or just love the aesthetic of the 16-bit era, you've come to the right place. <span class="blink" style="color:#ff0000;">★</span></p>
+            <div class="under-construction" style="margin-top:10px;">⚠ UNDER CONSTRUCTION ⚠<br/>New features coming soon!</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">LATEST NEWS</div>
+          <div class="panel-body" id="newsContainer"></div>
+        </div>
+      </div>
+
+      <div id="section-news" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">NEWS ARCHIVE</div>
+          <div class="panel-body" id="newsArchive"></div>
+        </div>
+      </div>
+
+      <div id="section-gallery" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">PIXEL GALLERY</div>
+          <div class="panel-body">
+            <p>Community pixel art submissions:</p>
+            <div id="gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="section-editor" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">PIXEL EDITOR (16x16)</div>
+          <div class="panel-body">
+            <div class="pixel-canvas-wrap">
+              <canvas id="pixelCanvas" width="256" height="256"></canvas>
+            </div>
+            <div class="tool-row">
+              <button class="tool-btn active" data-tool="draw">✏ DRAW</button>
+              <button class="tool-btn" data-tool="erase">🧽 ERASE</button>
+              <button class="tool-btn" data-tool="fill">🪣 FILL</button>
+              <button class="tool-btn" id="clearBtn">🗑 CLEAR</button>
+              <button class="tool-btn" id="saveBtn">💾 SAVE PNG</button>
+            </div>
+            <div class="tool-row" id="palette"></div>
+            <div style="font-size:10px;color:#666699;margin-top:4px;">Tip: Click &amp; drag to draw. Right-click to erase.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="section-tutorials" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">TUTORIALS</div>
+          <div class="panel-body">
+            <ul style="padding-left:18px;">
+              <li><a href="#">Spriting 101: Your First Sprite</a> <span class="new-tag">NEW!</span></li>
+              <li><a href="#">Color Theory for 8-bit Art</a></li>
+              <li><a href="#">Animation Basics: Walk Cycles</a></li>
+              <li><a href="#">Dithering Techniques</a></li>
+              <li><a href="#">Tile-Based Level Design</a></li>
+              <li><a href="#">Optimizing Sprites for Web</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="section-guestbook" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">GUESTBOOK</div>
+          <div class="panel-body">
+            <div class="gb-form">
+              <input type="text" id="gbName" placeholder="Your name..." maxlength="30" />
+              <textarea id="gbMsg" rows="3" placeholder="Leave a message..."></textarea>
+              <button id="gbSubmit">SIGN GUESTBOOK</button>
+            </div>
+            <div id="gbEntries" style="margin-top:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="section-links" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">COOL LINKS</div>
+          <div class="panel-body">
+            <ul style="padding-left:18px;line-height:1.8;">
+              <li><a href="#">Pixel Joint</a> - Pixel art community</li>
+              <li><a href="#">Spriter's Resource</a> - Game sprites</li>
+              <li><a href="#">RPG Maker Network</a> - RPG creation</li>
+              <li><a href="#">MUGEN Guild</a> - Fighting game engine</li>
+              <li><a href="#">DeviantArt</a> - Art sharing</li>
+              <li><a href="#">GameDev.net</a> - Game development</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="section-games" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">GAME CENTER <span class="new-tag">NEW!</span></div>
+          <div class="panel-body">
+            <p>Play our collection of retro HTML5 games right in your browser. No downloads, no plugins — just pure 8-bit fun!</p>
+            <div style="margin-top:10px;">
+              <a href="gamecenter.html" style="display:inline-block;background:#000066;border:2px outset #6666ff;color:#00ffff;padding:6px 12px;font-weight:bold;margin-right:6px;">▶ OPEN GAME CENTER</a>
+              <a href="paddlegame.html" style="display:inline-block;background:#000066;border:2px outset #6666ff;color:#00ffff;padding:6px 12px;font-weight:bold;">▶ PLAY RETRO ARCADE</a>
+            </div>
+            <div style="margin-top:12px;">
+              <p style="color:#ffff00;font-weight:bold;">Featured Games:</p>
+              <ul style="padding-left:18px;margin-top:4px;">
+                <li><a href="paddlegame.html">Retro Arcade</a> - Paddle, Breakout &amp; Snake (GameBoy style)</li>
+                <li><a href="gamecenter.html">Game Center Hub</a> - Browse the full collection</li>
+              </ul>
+            </div>
+            <div class="under-construction" style="margin-top:10px;">⚠ MORE GAMES COMING SOON ⚠</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="section-about" class="section" style="display:none;">
+        <div class="panel">
+          <div class="panel-title">ABOUT PIXELRANGER</div>
+          <div class="panel-body">
+            <p>PixelRanger was founded in 2001 by a group of passionate pixel artists who wanted a home on the web. Our mission: to preserve and promote the art of pixel graphics and retro game development.</p>
+            <p style="margin-top:6px;">This site is best viewed in <b>Netscape Navigator 4.0+</b> or <b>Internet Explorer 5.5+</b> at <b>800x600</b> resolution with 16-bit color.</p>
+            <p style="margin-top:6px;">Contact: <a href="mailto:webmaster@pixelranger.com">webmaster@pixelranger.com</a></p>
+          </div>
+        </div>
+      </div>
+    </td>
+  </tr></table>
+
+  <div class="webring">
+    ◄◄◄ PIXEL ART WEBRING ►►►<br/>
+    <a href="#">[Prev]</a> <a href="#">[Random]</a> <a href="#">[Next]</a> <a href="#">[List]</a><br/>
+    <span style="font-size:9px;">This site is a member of the Pixel Art Webring.</span>
+  </div>
+
+  <div class="footer">
+    © 2001-2026 PixelRanger. All rights reserved. |
+    <a href="#">Privacy</a> | <a href="#">Terms</a> | <a href="#">Sitemap</a><br/>
+    <span style="color:#ff0000;">Best viewed with JavaScript enabled.</span> |
+    <a href="mailto:webmaster@pixelranger.com">Webmaster</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  const starsEl = document.getElementById('stars');
+  for(let i=0;i<80;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const size=Math.random()*2+1;
+    s.style.width=size+'px'; s.style.height=size+'px';
+    s.style.left=Math.random()*100+'vw';
+    s.style.top=Math.random()*100+'vh';
+    s.style.animationDelay=Math.random()*2+'s';
+    s.style.animationDuration=(1.5+Math.random()*2)+'s';
+    starsEl.appendChild(s);
+  }
+
+  const trail=[]; 
+  for(let i=0;i<8;i++){const t=document.createElement('div');t.className='trail';document.body.appendChild(t);trail.push(t);}
+  let mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  (function animTrail(){
+    let x=mx,y=my;
+    trail.forEach((t,i)=>{
+      const nx=x, ny=y;
+      t.style.left=(nx-3)+'px'; t.style.top=(ny-3)+'px';
+      t.style.opacity=(1-i/trail.length)*0.8;
+      x += (mx-x)*0.15; y += (my-y)*0.15;
+    });
+    requestAnimationFrame(animTrail);
+  })();
+
+  const counterEl=document.getElementById('counter');
+  let count=parseInt(localStorage.getItem('pr_hits')||'0',10);
+  count++; localStorage.setItem('pr_hits',count);
+  const str=String(count).padStart(6,'0');
+  str.split('').forEach(d=>{
+    const span=document.createElement('span');
+    span.textContent=d; span.style.cssText='background:#003300;color:#00ff00;font-family:"Courier New",monospace;font-size:16px;padding:0 4px;border:1px solid #006600;display:inline-block;';
+    counterEl.appendChild(span);
+  });
+
+  const navLinks=document.querySelectorAll('.nav-link');
+  navLinks.forEach(link=>{
+    link.addEventListener('click',e=>{
+      e.preventDefault();
+      const sec=link.dataset.section;
+      document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+      document.getElementById('section-'+sec).style.display='block';
+      navLinks.forEach(l=>l.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  const news=[
+    {date:'Oct 17, 2026',title:'Pixel Editor Launched!',body:'Try our new in-browser pixel editor. Draw 16x16 sprites and save as PNG.'},
+    {date:'Oct 10, 2026',title:'Tutorial: Spriting 101',body:'New tutorial posted on creating your first sprite. Check the Tutorials section.'},
+    {date:'Sep 28, 2026',title:'Gallery Update',body:'12 new pixel art submissions added to the gallery.'},
+    {date:'Sep 15, 2026',title:'Webring Expanded',body:'5 new sites joined the Pixel Art Webring.'},
+  ];
+  function renderNews(container,limit){
+    const el=document.getElementById(container);
+    const list=limit?news.slice(0,limit):news;
+    el.innerHTML=list.map(n=>`
+      <div class="news-item">
+        <div class="news-date">${n.date}</div>
+        <div class="news-title">${n.title}</div>
+        <div class="news-body">${n.body}</div>
+      </div>
+    `).join('');
+  }
+  renderNews('newsContainer',3);
+  renderNews('newsArchive');
+
+  const galleryEl=document.getElementById('gallery');
+  const palette=['#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff','#00ffff','#ffffff','#808080','#ff8000','#8000ff'];
+  for(let i=0;i<12;i++){
+    const c=document.createElement('canvas');
+    c.width=64;c.height=64;c.style.border='2px inset #666699';c.style.imageRendering='pixelated';
+    const ctx=c.getContext('2d');
+    for(let y=0;y<8;y++) for(let x=0;x<8;x++){
+      if(Math.random()>0.4){
+        ctx.fillStyle=palette[Math.floor(Math.random()*palette.length)];
+        ctx.fillRect(x*8,y*8,8,8);
+      }
+    }
+    galleryEl.appendChild(c);
+  }
+
+  const pc=document.getElementById('pixelCanvas');
+  const pctx=pc.getContext('2d');
+  const GRID=16, CELL=16;
+  let tool='draw', color='#ff0000', drawing=false, erasing=false;
+  pctx.fillStyle='#1a1a4a'; pctx.fillRect(0,0,pc.width,pc.height);
+  function drawGrid(){
+    pctx.strokeStyle='rgba(255,255,255,0.08)';
+    for(let i=0;i<=GRID;i++){
+      pctx.beginPath();pctx.moveTo(i*CELL,0);pctx.lineTo(i*CELL,pc.height);pctx.stroke();
+      pctx.beginPath();pctx.moveTo(0,i*CELL);pctx.lineTo(pc.width,i*CELL);pctx.stroke();
+    }
+  }
+  drawGrid();
+
+  const colors=['#000000','#ffffff','#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff','#00ffff','#808080','#ff8000','#8000ff','#008000','#800000','#000080','#c0c0c0','#ffa0a0'];
+  const paletteEl=document.getElementById('palette');
+  colors.forEach((c,i)=>{
+    const sw=document.createElement('div');
+    sw.className='color-swatch'+(i===2?' active':'');
+    sw.style.background=c;
+    sw.addEventListener('click',()=>{ color=c; document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); sw.classList.add('active'); });
+    paletteEl.appendChild(sw);
+  });
+
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(b=>{
+    b.addEventListener('click',()=>{ tool=b.dataset.tool; document.querySelectorAll('.tool-btn[data-tool]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
+  });
+  document.getElementById('clearBtn').addEventListener('click',()=>{
+    pctx.fillStyle='#1a1a4a'; pctx.fillRect(0,0,pc.width,pc.height); drawGrid();
+  });
+  document.getElementById('saveBtn').addEventListener('click',()=>{
+    const link=document.createElement('a');
+    link.download='sprite.png';
+    link.href=pc.toDataURL('image/png');
+    link.click();
+  });
+
+  function paintCell(e){
+    const rect=pc.getBoundingClientRect();
+    const x=Math.floor((e.clientX-rect.left)/(rect.width/pc.width)/CELL);
+    const y=Math.floor((e.clientY-rect.top)/(rect.height/pc.height)/CELL);
+    if(x<0||y<0||x>=GRID||y>=GRID) return;
+    if(tool==='erase'||erasing){ pctx.fillStyle='#1a1a4a'; }
+    else if(tool==='fill'){ floodFill(x,y,color); drawGrid(); return; }
+    else { pctx.fillStyle=color; }
+    pctx.fillRect(x*CELL,y*CELL,CELL,CELL);
+    drawGrid();
+  }
+  function floodFill(sx,sy,fillColor){
+    const img=pctx.getImageData(0,0,pc.width,pc.height);
+    const data=img.data;
+    const idx=(y,x)=>(y*pc.width+x)*4;
+    const target=[...data.slice(idx(sy,sx),idx(sy,sx)+3),data[idx(sy,sx)+3]];
+    const stack=[[sx,sy]];
+    const visited=new Set();
+    while(stack.length){
+      const [x,y]=stack.pop();
+      if(x<0||y<0||x>=pc.width||y>=pc.height) continue;
+      const key=y*pc.width+x;
+      if(visited.has(key)) continue;
+      visited.add(key);
+      const i=idx(y,x);
+      if(data[i]!==target[0]||data[i+1]!==target[1]||data[i+2]!==target[2]||data[i+3]!==target[3]) continue;
+      data[i]=parseInt(fillColor.slice(1,3),16);
+      data[i+1]=parseInt(fillColor.slice(3,5),16);
+      data[i+2]=parseInt(fillColor.slice(5,7),16);
+      data[i+3]=255;
+      stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+    }
+    pctx.putImageData(img,0,0);
+  }
+  pc.addEventListener('mousedown',e=>{drawing=true; if(e.button===2) erasing=true; paintCell(e);});
+  pc.addEventListener('mousemove',e=>{ if(drawing) paintCell(e); });
+  window.addEventListener('mouseup',()=>{drawing=false;erasing=false;});
+  pc.addEventListener('contextmenu',e=>e.preventDefault());
+
+  const gbEntries=document.getElementById('gbEntries');
+  function renderGB(){
+    const entries=JSON.parse(localStorage.getItem('pr_gb')||'[]');
+    gbEntries.innerHTML=entries.length?entries.map(e=>`
+      <div class="gb-entry">
+        <span class="name">${escapeHtml(e.name)}</span>
+        <span class="date"> - ${e.date}</span>
+        <div class="msg">${escapeHtml(e.msg)}</div>
+      </div>
+    `).join(''):'<div style="color:#666699;">No entries yet. Be the first!</div>';
+  }
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  renderGB();
+  document.getElementById('gbSubmit').addEventListener('click',()=>{
+    const name=document.getElementById('gbName').value.trim()||'Anonymous';
+    const msg=document.getElementById('gbMsg').value.trim();
+    if(!msg){alert('Please enter a message!');return;}
+    const entries=JSON.parse(localStorage.getItem('pr_gb')||'[]');
+    entries.unshift({name,msg,date:new Date().toLocaleDateString()});
+    localStorage.setItem('pr_gb',JSON.stringify(entries.slice(0,50)));
+    document.getElementById('gbMsg').value='';
+    renderGB();
+    alert('Thanks for signing!');
+  });
+
+  let audioCtx=null, midiPlaying=false, midiTimer=null;
+  const melody=[262,294,330,349,392,440,494,523,494,440,392,349,330,294,262,0];
+  let mi=0;
+  function playNote(freq){
+    if(!audioCtx||freq===0) return;
+    const o=audioCtx.createOscillator();const g=audioCtx.createGain();
+    o.type='square';o.frequency.value=freq;
+    g.gain.value=0.06;
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start();g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.18);
+    o.stop(audioCtx.currentTime+0.2);
+  }
+  document.getElementById('midiPlay').addEventListener('click',()=>{
+    if(midiPlaying) return;
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    midiPlaying=true;
+    document.getElementById('midiStatus').textContent='PLAYING';
+    mi=0;
+    midiTimer=setInterval(()=>{playNote(melody[mi%melody.length]); mi++;},220);
+  });
+  document.getElementById('midiStop').addEventListener('click',()=>{
+    midiPlaying=false; clearInterval(midiTimer); midiTimer=null;
+    document.getElementById('midiStatus').textContent='STOPPED';
+  });
+})();
+</script>
+</body>
+</html>

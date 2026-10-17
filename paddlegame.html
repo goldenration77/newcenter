@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RETRO ARCADE - GameBoy</title>
+<style>
+  :root{
+    --gb-body:#8b8b7a;
+    --gb-dark:#5a5a4e;
+    --gb-light:#b8b8a6;
+    --gb-screen:#9bbc0f;
+    --gb-screen-dark:#0f380f;
+    --gb-btn:#3a3a32;
+    --gb-red:#b02020;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;background:radial-gradient(ellipse at center,#1a1a1a 0%,#000 100%);overflow:hidden;font-family:'Courier New',monospace;color:#eee;}
+  body{display:flex;align-items:center;justify-content:center;}
+
+  .console{
+    position:relative;
+    width:min(95vw,560px);
+    aspect-ratio:1/1.62;
+    background:linear-gradient(135deg,var(--gb-light) 0%,var(--gb-body) 40%,var(--gb-dark) 100%);
+    border-radius:42px 42px 96px 42px;
+    box-shadow:0 30px 60px rgba(0,0,0,0.7),inset 0 3px 6px rgba(255,255,255,0.25),inset 0 -6px 12px rgba(0,0,0,0.35);
+    padding:5%;
+    display:flex;flex-direction:column;gap:3%;
+  }
+  .brand{text-align:center;font-size:clamp(11px,2.4vw,17px);font-weight:700;color:#3a3a32;letter-spacing:3px;text-shadow:0 1px 0 rgba(255,255,255,0.4);}
+  .brand small{display:block;font-size:0.6em;letter-spacing:4px;opacity:0.7;margin-top:2px;}
+
+  .screen-bezel{
+    background:linear-gradient(180deg,#2a2a24,#1a1a16);
+    border-radius:16px;padding:9px;
+    box-shadow:inset 0 4px 8px rgba(0,0,0,0.6),0 2px 4px rgba(255,255,255,0.15);
+    flex:0 0 50%;position:relative;
+  }
+  .screen-wrap{position:relative;width:100%;height:100%;border-radius:6px;overflow:hidden;background:#0f380f;}
+  canvas{display:block;width:100%;height:100%;image-rendering:pixelated;}
+
+  .crt{position:absolute;inset:0;pointer-events:none;border-radius:6px;overflow:hidden;}
+  .crt::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0.18) 0px,rgba(0,0,0,0.18) 1px,transparent 1px,transparent 3px);mix-blend-mode:multiply;z-index:2;}
+  .crt::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.55) 100%);z-index:3;}
+  .bloom{position:absolute;inset:0;pointer-events:none;border-radius:6px;box-shadow:inset 0 0 40px rgba(155,188,15,0.15);mix-blend-mode:screen;z-index:1;}
+  .screen-curve{position:absolute;inset:0;pointer-events:none;border-radius:6px;background:radial-gradient(ellipse at center,rgba(255,255,255,0.06) 0%,transparent 70%);z-index:4;}
+
+  .controls{flex:1;display:flex;align-items:center;justify-content:space-between;padding:0 4%;}
+  .dpad{position:relative;width:30%;aspect-ratio:1;}
+  .dpad button{position:absolute;width:34%;height:34%;background:var(--gb-btn);border:none;border-radius:6px;color:#ddd;font-size:14px;font-weight:700;box-shadow:0 3px 0 #1a1a16,inset 0 1px 0 rgba(255,255,255,0.1);cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform 0.05s;}
+  .dpad button:active{transform:translateY(2px);box-shadow:0 1px 0 #1a1a16;}
+  .dpad .up{left:33%;top:0;}
+  .dpad .down{left:33%;bottom:0;}
+  .dpad .left{left:0;top:33%;}
+  .dpad .right{right:0;top:33%;}
+  .dpad .center{left:33%;top:33%;background:#2a2a24;pointer-events:none;}
+
+  .action-buttons{display:flex;gap:14px;align-items:center;}
+  .action-buttons .btn{width:52px;height:52px;border-radius:50%;background:var(--gb-red);border:none;color:#fff;font-weight:700;font-size:16px;box-shadow:0 4px 0 #6a1010,inset 0 2px 3px rgba(255,255,255,0.25);cursor:pointer;user-select:none;transition:transform 0.05s;}
+  .action-buttons .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #6a1010;}
+  .action-buttons .btn.b{background:#2a2a8a;box-shadow:0 4px 0 #1a1a5a;}
+
+  .start-select{display:flex;gap:10px;justify-content:center;margin-top:6px;}
+  .start-select button{padding:6px 14px;border-radius:10px;border:none;background:var(--gb-btn);color:#ccc;font-size:10px;letter-spacing:1px;box-shadow:0 2px 0 #1a1a16;cursor:pointer;user-select:none;}
+  .start-select button:active{transform:translateY(2px);box-shadow:0 0 0 #1a1a16;}
+
+  .speaker{position:absolute;bottom:6%;right:6%;width:22%;height:14%;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}
+  .speaker span{background:var(--gb-dark);border-radius:2px;box-shadow:inset 0 1px 1px rgba(0,0,0,0.5);}
+
+  .led{position:absolute;top:14%;right:8%;width:8px;height:8px;border-radius:50%;background:#c03030;box-shadow:0 0 6px #ff4040,0 0 12px #ff4040;animation:blink 2s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+  .hud{position:absolute;top:6px;left:0;right:0;text-align:center;color:#0f380f;font-size:11px;letter-spacing:2px;pointer-events:none;z-index:5;font-weight:700;text-shadow:0 0 4px rgba(155,188,15,0.6);}
+</style>
+</head>
+<body>
+
+<div class="console">
+  <div class="brand">NINTENDO<small>GAME BOY</small></div>
+  <div class="led"></div>
+
+  <div class="screen-bezel">
+    <div class="screen-wrap">
+      <canvas id="screen" width="240" height="216"></canvas>
+      <div class="bloom"></div>
+      <div class="crt"></div>
+      <div class="screen-curve"></div>
+      <div class="hud" id="hud">RETRO ARCADE</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="dpad">
+      <button class="up" data-dir="up">▲</button>
+      <button class="down" data-dir="down">▼</button>
+      <button class="left" data-dir="left">◀</button>
+      <button class="right" data-dir="right">▶</button>
+      <div class="center"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div class="action-buttons">
+        <button class="btn b" id="btnB">B</button>
+        <button class="btn" id="btnA">A</button>
+      </div>
+      <div class="start-select">
+        <button id="btnSelect">SELECT</button>
+        <button id="btnStart">START</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="speaker">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('screen');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const hud = document.getElementById('hud');
+
+  // ---------- Settings ----------
+  const PTS=[3,5,7,9,11];
+  const SPEEDS=['SLOW','NORMAL','FAST'];
+  const SPEEDMULT=[0.75,1,1.35];
+  const DIFFS=['EASY','MED','HARD'];
+  let settings={pointsIdx:2,speedIdx:1,diffIdx:1};
+  try{
+    const s=JSON.parse(localStorage.getItem('ra_settings')||'null');
+    if(s) settings=s;
+  }catch(e){}
+  function saveSettings(){ try{localStorage.setItem('ra_settings',JSON.stringify(settings));}catch(e){} }
+  function sm(){ return SPEEDMULT[settings.speedIdx]; }
+  function pts(){ return PTS[settings.pointsIdx]; }
+  function diff(){ return settings.diffIdx; }
+
+  // ---------- Input ----------
+  const keys={};
+  window.addEventListener('keydown',e=>{
+    keys[e.key]=true;
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  });
+  window.addEventListener('keyup',e=>{ keys[e.key]=false; });
+
+  document.querySelectorAll('.dpad button').forEach(b=>{
+    const dir=b.dataset.dir;
+    const press=()=>{ keys['dpad_'+dir]=true; };
+    const release=()=>{ keys['dpad_'+dir]=false; };
+    b.addEventListener('mousedown',press);
+    b.addEventListener('mouseup',release);
+    b.addEventListener('mouseleave',release);
+    b.addEventListener('touchstart',e=>{e.preventDefault();press();});
+    b.addEventListener('touchend',e=>{e.preventDefault();release();});
+  });
+
+  let prevInput=null;
+  function inputState(){
+    return {
+      up: !!(keys['ArrowUp']||keys['w']||keys['W']||keys['dpad_up']),
+      down: !!(keys['ArrowDown']||keys['s']||keys['S']||keys['dpad_down']),
+      left: !!(keys['ArrowLeft']||keys['a']||keys['A']||keys['dpad_left']),
+      right: !!(keys['ArrowRight']||keys['d']||keys['D']||keys['dpad_right']),
+      a: !!(keys[' ']||keys['z']||keys['Z']),
+      b: !!(keys['x']||keys['X']||keys['Escape']),
+      start: !!(keys['Enter']),
+      select: !!(keys['Shift']),
+    };
+  }
+  function justPressed(cur,prev){
+    const r={};
+    for(const k in cur){ r[k]=cur[k] && !(prev&&prev[k]); }
+    return r;
+  }
+
+  // click pulses
+  let clickA=false,clickB=false,clickStart=false,clickSelect=false;
+  function pulseA(){ clickA=true; }
+  function pulseB(){ clickB=true; }
+  function pulseStart(){ clickStart=true; }
+  function pulseSelect(){ clickSelect=true; }
+  document.getElementById('btnA').addEventListener('click',pulseA);
+  document.getElementById('btnB').addEventListener('click',pulseB);
+  document.getElementById('btnStart').addEventListener('click',pulseStart);
+  document.getElementById('btnSelect').addEventListener('click',pulseSelect);
+
+  // ---------- Audio ----------
+  let audioCtx=null;
+  function beep(freq,dur,type='square',vol=0.08){
+    try{
+      if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      const o=audioCtx.createOscillator();
+      const g=audioCtx.createGain();
+      o.type=type; o.frequency.value=freq;
+      g.gain.value=vol;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+dur);
+      o.stop(audioCtx.currentTime+dur);
+    }catch(e){}
+  }
+
+  // ---------- State ----------
+  const GAMES=['PADDLE','BREAKOUT','SNAKE'];
+  let state='menu'; // menu, settings, play, paused, over
+  let menuSel=0;
+  let selSetting=0;
+  let currentGame=null;
+
+  // ---------- Helpers ----------
+  function clamp(v,lo,hi){ return Math.max(lo,Math.min(hi,v)); }
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+  function spawnParts(arr,x,y,color,n,sp=2.5){
+    for(let i=0;i<n;i++){
+      const a=Math.random()*Math.PI*2;
+      const s=1+Math.random()*sp;
+      arr.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,color});
+    }
+  }
+  function updateParts(arr){
+    arr.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vx*=0.92; p.vy*=0.92; p.life-=0.05; });
+    return arr.filter(p=>p.life>0);
+  }
+  function drawParts(arr){
+    arr.forEach(p=>{
+      ctx.globalAlpha=p.life;
+      ctx.fillStyle=p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,1.5,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha=1;
+  }
+
+  // ---------- Games ----------
+  const games = {};
+
+  // PADDLE
+  games.PADDLE = {
+    init(){
+      const ph = diff()===0?36:diff()===1?28:22;
+      this.ph=ph;
+      this.player={x:8,y:H/2-ph/2,vy:0};
+      this.ai={x:W-12,y:H/2-ph/2,vy:0};
+      this.ball={x:W/2,y:H/2,vx:2.2*sm(),vy:(Math.random()*2-1)*1.6*sm()};
+      this.scoreP=0;this.scoreAI=0;
+      this.trail=[];this.parts=[];this.flash=0;this.over=false;
+      this.aiSpeed=diff()===0?1.6:diff()===1?2.4:3.2;
+      this.winner='';
+    },
+    resetBall(toward){
+      this.ball.x=W/2;this.ball.y=H/2;
+      this.ball.vx=(toward==='player'?-2.2:2.2)*sm();
+      this.ball.vy=(Math.random()*2-1)*1.6*sm();
+      this.trail=[];
+    },
+    update(jp,input){
+      // player
+      let dir=0;
+      if(input.up) dir=-1; if(input.down) dir=1;
+      this.player.vy=dir*3.4*sm();
+      this.player.y+=this.player.vy;
+      this.player.y=clamp(this.player.y,0,H-this.ph);
+
+      if(state!=='play') return;
+
+      // AI
+      const target=this.ball.y-this.ph/2;
+      const diffv=target-this.ai.y;
+      this.ai.vy=Math.sign(diffv)*Math.min(this.aiSpeed,Math.abs(diffv)*0.1);
+      this.ai.y+=this.ai.vy;
+      this.ai.y=clamp(this.ai.y,0,H-this.ph);
+
+      // ball
+      this.ball.x+=this.ball.vx;
+      this.ball.y+=this.ball.vy;
+
+      if(this.ball.y-BALLR<0){this.ball.y=BALLR;this.ball.vy*=-1;beep(440,0.05);spawnParts(this.parts,this.ball.x,this.ball.y,'#9bbc0f',6);}
+      if(this.ball.y+BALLR>H){this.ball.y=H-BALLR;this.ball.vy*=-1;beep(440,0.05);spawnParts(this.parts,this.ball.x,this.ball.y,'#9bbc0f',6);}
+
+      // player paddle
+      if(this.ball.x-BALLR<=this.player.x+4 && this.ball.x>BALLR &&
+         this.ball.y>=this.player.y && this.ball.y<=this.player.y+this.ph && this.ball.vx<0){
+        this.ball.x=this.player.x+4+BALLR;
+        const rel=(this.ball.y-(this.player.y+this.ph/2))/(this.ph/2);
+        const speed=Math.min(5.5,Math.hypot(this.ball.vx,this.ball.vy)+0.15)*sm();
+        const ang=rel*0.7;
+        this.ball.vx=Math.cos(ang)*speed;
+        this.ball.vy=Math.sin(ang)*speed+rel*0.6;
+        if(this.ball.vx<0)this.ball.vx*=-1;
+        beep(660,0.06); spawnParts(this.parts,this.ball.x,this.ball.y,'#9bbc0f',10); this.flash=6;
+      }
+      // ai paddle
+      if(this.ball.x+BALLR>=this.ai.x && this.ball.x<W-BALLR &&
+         this.ball.y>=this.ai.y && this.ball.y<=this.ai.y+this.ph && this.ball.vx>0){
+        this.ball.x=this.ai.x-BALLR;
+        const rel=(this.ball.y-(this.ai.y+this.ph/2))/(this.ph/2);
+        const speed=Math.min(5.5,Math.hypot(this.ball.vx,this.ball.vy)+0.1)*sm();
+        const ang=rel*0.7;
+        this.ball.vx=-Math.cos(ang)*speed;
+        this.ball.vy=Math.sin(ang)*speed+rel*0.6;
+        beep(520,0.06); spawnParts(this.parts,this.ball.x,this.ball.y,'#9bbc0f',8);
+      }
+
+      if(this.ball.x<0){
+        this.scoreAI++; hud.textContent='P:'+this.scoreP+'  AI:'+this.scoreAI;
+        beep(220,0.2,'sawtooth',0.1); spawnParts(this.parts,0,this.ball.y,'#b02020',16); this.flash=12;
+        if(this.scoreAI>=pts()){ this.over=true; this.winner='AI WINS'; state='over'; hud.textContent='GAME OVER - AI WINS'; }
+        else this.resetBall('ai');
+      }
+      if(this.ball.x>W){
+        this.scoreP++; hud.textContent='P:'+this.scoreP+'  AI:'+this.scoreAI;
+        beep(880,0.2,'square',0.1); spawnParts(this.parts,W,this.ball.y,'#9bbc0f',16); this.flash=12;
+        if(this.scoreP>=pts()){ this.over=true; this.winner='YOU WIN'; state='over'; hud.textContent='YOU WIN!'; }
+        else this.resetBall('player');
+      }
+
+      this.trail.push({x:this.ball.x,y:this.ball.y});
+      if(this.trail.length>14) this.trail.shift();
+      this.parts=updateParts(this.parts);
+      if(this.flash>0) this.flash--;
+    },
+    draw(){
+      ctx.fillStyle='rgba(15,56,15,0.3)';
+      ctx.fillRect(0,0,W,H);
+      // net
+      ctx.fillStyle='rgba(155,188,15,0.3)';
+      for(let y=0;y<H;y+=8) ctx.fillRect(W/2-1,y,2,4);
+      // paddles
+      ctx.shadowColor='#9bbc0f'; ctx.shadowBlur=8; ctx.fillStyle='#9bbc0f';
+      roundRect(ctx,this.player.x,this.player.y,4,this.ph,2); ctx.fill();
+      roundRect(ctx,this.ai.x,this.ai.y,4,this.ph,2); ctx.fill();
+      // trail
+      this.trail.forEach((t,i)=>{
+        ctx.globalAlpha=(i/this.trail.length)*0.6;
+        ctx.beginPath();
+        ctx.arc(t.x,t.y,BALLR*(0.4+i/this.trail.length*0.6),0,Math.PI*2);
+        ctx.fillStyle='#9bbc0f'; ctx.fill();
+      });
+      ctx.globalAlpha=1;
+      // ball
+      ctx.shadowBlur=14; ctx.beginPath(); ctx.arc(this.ball.x,this.ball.y,BALLR,0,Math.PI*2);
+      ctx.fillStyle='#cfe87a'; ctx.fill();
+      // parts
+      ctx.shadowBlur=6; drawParts(this.parts);
+      ctx.shadowBlur=0;
+      if(this.flash>0){ ctx.fillStyle='rgba(155,188,15,'+(this.flash/12*0.25)+')'; ctx.fillRect(0,0,W,H); }
+      if(state==='over'){
+        ctx.fillStyle='#0f380f'; ctx.font='bold 14px "Courier New",monospace'; ctx.textAlign='center';
+        ctx.shadowColor='#9bbc0f'; ctx.shadowBlur=4;
+        ctx.fillText(this.winner,W/2,90); ctx.shadowBlur=0;
+        ctx.font='bold 9px "Courier New",monospace';
+        ctx.fillText('P:'+this.scoreP+'  AI:'+this.scoreAI,W/2,120);
+        ctx.fillText('PRESS A',W/2,150);
+      }
+      if(state==='paused'){ drawCentered('PAUSED',14); }
+    },
+    onA(){ if(this.over){ state='menu'; } }
+  };
+
+  const BALLR=3;
+
+  // BREAKOUT
+  games.BREAKOUT = {
+    init(){
+      const ph=diff()===0?50:diff()===1?40:30;
+      this.pw=ph;
+      this.paddle={x:W/2-ph/2,y:H-22,w:ph,h:6};
+      this.ball={x:W/2,y:H/2,vx:1.8*sm(),vy:-1.8*sm()};
+      this.bricks=[];
+      const cols=8, rows=5;
+      const bw=(W-20)/cols, bh=12;
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+        this.bricks.push({x:10+c*bw,y:24+r*(bh+2),w:bw-2,h:bh,hp: (r<2?2:1), color: r<2?'#b02020':'#9bbc0f'});
+      }
+      this.lives=3; this.score=0; this.trail=[]; this.parts=[]; this.flash=0; this.over=false; this.won=false;
+    },
+    update(jp,input){
+      // paddle
+      let dir=0;
+      if(input.left) dir=-1; if(input.right) dir=1;
+      this.paddle.x+=dir*4.5*sm();
+      this.paddle.x=clamp(this.paddle.x,4,W-this.paddle.w-4);
+      if(jp.a){ /* launch if stuck? no */ }
+
+      if(state!=='play') return;
+
+      this.ball.x+=this.ball.vx;
+      this.ball.y+=this.ball.vy;
+
+      // walls
+      if(this.ball.x-BALLR<0){this.ball.x=BALLR;this.ball.vx*=-1;beep(440,0.04);}
+      if(this.ball.x+BALLR>W){this.ball.x=W-BALLR;this.ball.vx*=-1;beep(440,0.04);}
+      if(this.ball.y-BALLR<0){this.ball.y=BALLR;this.ball.vy*=-1;beep(440,0.04);}
+
+      // paddle
+      if(this.ball.y+BALLR>=this.paddle.y && this.ball.y<this.paddle.y+this.paddle.h &&
+         this.ball.x>=this.paddle.x && this.ball.x<=this.paddle.x+this.paddle.w && this.ball.vy>0){
+        this.ball.y=this.paddle.y-BALLR;
+        const rel=(this.ball.x-(this.paddle.x+this.paddle.w/2))/(this.paddle.w/2);
+        const speed=Math.min(6,Math.hypot(this.ball.vx,this.ball.vy)+0.1)*sm();
+        const ang=rel*0.8;
+        this.ball.vx=Math.sin(ang)*speed;
+        this.ball.vy=-Math.cos(ang)*speed;
+        beep(660,0.06); spawnParts(this.parts,this.ball.x,this.ball.y,'#9bbc0f',8); this.flash=4;
+      }
+
+      // bricks
+      for(let i=this.bricks.length-1;i>=0;i--){
+        const b=this.bricks[i];
+        if(this.ball.x+BALLR>b.x && this.ball.x-BALLR<b.x+b.w &&
+           this.ball.y+BALLR>b.y && this.ball.y-BALLR<b.y+b.h){
+          // determine side
+          const overlapLeft=this.ball.x+BALLR-b.x;
+          const overlapRight=b.x+b.w-(this.ball.x-BALLR);
+          const overlapTop=this.ball.y+BALLR-b.y;
+          const overlapBottom=b.y+b.h-(this.ball.y-BALLR);
+          const minO=Math.min(overlapLeft,overlapRight,overlapTop,overlapBottom);
+          if(minO===overlapTop||minO===overlapBottom) this.ball.vy*=-1;
+          else this.ball.vx*=-1;
+          b.hp--;
+          if(b.hp<=0){
+            this.bricks.splice(i,1);
+            this.score+=10;
+            spawnParts(this.parts,b.x+b.w/2,b.y+b.h/2,b.color,12);
+            beep(780,0.05);
+          } else {
+            beep(520,0.04);
+          }
+          this.flash=3;
+          break;
+        }
+      }
+
+      // ball lost
+      if(this.ball.y>H){
+        this.lives--;
+        beep(220,0.2,'sawtooth',0.1);
+        spawnParts(this.parts,this.ball.x,H,'#b02020',16); this.flash=12;
+        if(this.lives<=0){ this.over=true; state='over'; hud.textContent='GAME OVER'; }
+        else { this.ball.x=W/2;this.ball.y=H/2;this.ball.vx=1.8*sm();this.ball.vy=-1.8*sm(); this.paddle.x=W/2-this.paddle.w/2; }
+      }
+
+      if(this.bricks.length===0 && !this.won){
+        this.won=true; this.over=true; state='over'; hud.textContent='YOU WIN!'; beep(990,0.3,'square',0.12);
+      }
+
+      hud.textContent='BREAKOUT  SCORE:'+this.score+'  LIVES:'+this.lives;
+
+      this.trail.push({x:this.ball.x,y:this.ball.y});
+      if(this.trail.length>10) this.trail.shift();
+      this.parts=updateParts(this.parts);
+      if(this.flash>0) this.flash--;
+    },
+    draw(){
+      ctx.fillStyle='rgba(15,56,15,0.25)';
+      ctx.fillRect(0,0,W,H);
+      // bricks
+      this.bricks.forEach(b=>{
+        ctx.shadowColor=b.color; ctx.shadowBlur=4;
+        ctx.fillStyle=b.color;
+        roundRect(ctx,b.x,b.y,b.w,b.h,2); ctx.fill();
+        ctx.shadowBlur=0;
+      });
+      // paddle
+      ctx.shadowColor='#9bbc0f'; ctx.shadowBlur=8; ctx.fillStyle='#9bbc0f';
+      roundRect(ctx,this.paddle.x,this.paddle.y,this.paddle.w,this.paddle.h,3); ctx.fill();
+      // trail
+      this.trail.forEach((t,i)=>{
+        ctx.globalAlpha=(i/this.trail.length)*0.5;
+        ctx.beginPath(); ctx.arc(t.x,t.y,BALLR*0.8,0,Math.PI*2); ctx.fillStyle='#9bbc0f'; ctx.fill();
+      });
+      ctx.globalAlpha=1;
+      // ball
+      ctx.shadowBlur=14; ctx.beginPath(); ctx.arc(this.ball.x,this.ball.y,BALLR,0,Math.PI*2);
+      ctx.fillStyle='#cfe87a'; ctx.fill();
+      ctx.shadowBlur=0;
+      // parts
+      drawParts(this.parts);
+      if(this.flash>0){ ctx.fillStyle='rgba(155,188,15,'+(this.flash/12*0.2)+')'; ctx.fillRect(0,0,W,H); }
+      if(state==='over'){
+        ctx.fillStyle='#0f380f'; ctx.font='bold 14px "Courier New",monospace'; ctx.textAlign='center';
+        ctx.shadowColor='#9bbc0f'; ctx.shadowBlur=4;
+        ctx.fillText(this.won?'YOU WIN!':'GAME OVER',W/2,90); ctx.shadowBlur=0;
+        ctx.font='bold 9px "Courier New",monospace';
+        ctx.fillText('SCORE:'+this.score,W/2,120);
+        ctx.fillText('PRESS A',W/2,150);
+      }
+      if(state==='paused'){ drawCentered('PAUSED',14); }
+    },
+    onA(){ if(this.over) state='menu'; }
+  };
+
+  // SNAKE
+  games.SNAKE = {
+    init(){
+      this.gw=20; this.gh=18; this.cell=12;
+      this.ox=(W-this.gw*this.cell)/2; this.oy=(H-this.gh*this.cell)/2;
+      this.snake=[{x:10,y:9},{x:9,y:9},{x:8,y:9}];
+      this.dir={x:1,y:0}; this.ndir={x:1,y:0};
+      this.food=this.newFood();
+      this.score=0; this.alive=true; this.over=false;
+      const base=diff()===0?9:diff()===1?7:5;
+      const spd=sm();
+      this.tickRate=Math.max(3, Math.round(base/spd));
+      this.acc=0;
+      this.parts=[];
+    },
+    newFood(){
+      let f;
+      do{ f={x:Math.floor(Math.random()*this.gw),y:Math.floor(Math.random()*this.gh)}; }
+      while(this.snake && this.snake.some(s=>s.x===f.x&&s.y===f.y));
+      return f;
+    },
+    update(jp,input){
+      // direction changes
+      if(jp.up && this.dir.y!==1){ this.ndir={x:0,y:-1}; }
+      if(jp.down && this.dir.y!==-1){ this.ndir={x:0,y:1}; }
+      if(jp.left && this.dir.x!==1){ this.ndir={x:-1,y:0}; }
+      if(jp.right && this.dir.x!==-1){ this.ndir={x:1,y:0}; }
+
+      if(state!=='play') return;
+
+      this.acc++;
+      if(this.acc < this.tickRate) return;
+      this.acc=0;
+      this.dir=this.ndir;
+      const head={x:this.snake[0].x+this.dir.x, y:this.snake[0].y+this.dir.y};
+      // walls
+      if(head.x<0||head.x>=this.gw||head.y<0||head.y>=this.gh){
+        this.die(); return;
+      }
+      // self
+      if(this.snake.some(s=>s.x===head.x&&s.y===head.y)){ this.die(); return; }
+      this.snake.unshift(head);
+      if(head.x===this.food.x && head.y===this.food.y){
+        this.score++;
+        beep(780,0.06);
+        spawnParts(this.parts, this.ox+head.x*this.cell+this.cell/2, this.oy+head.y*this.cell+this.cell/2, '#9bbc0f', 10);
+        this.food=this.newFood();
+        hud.textContent='SNAKE  SCORE:'+this.score;
+      } else {
+        this.snake.pop();
+      }
+      this.parts=updateParts(this.parts);
+    },
+    die(){
+      this.alive=false; this.over=true; state='over';
+      hud.textContent='GAME OVER  SCORE:'+this.score;
+      beep(220,0.25,'sawtooth',0.1);
+    },
+    draw(){
+      ctx.fillStyle='rgba(15,56,15,0.3)';
+      ctx.fillRect(0,0,W,H);
+      // grid border
+      ctx.strokeStyle='rgba(155,188,15,0.25)'; ctx.lineWidth=1;
+      ctx.strokeRect(this.ox-1,this.oy-1,this.gw*this.cell+2,this.gh*this.cell+2);
+      // food
+      ctx.shadowColor='#b02020'; ctx.shadowBlur=8; ctx.fillStyle='#b02020';
+      ctx.fillRect(this.ox+this.food.x*this.cell+3, this.oy+this.food.y*this.cell+3, this.cell-6, this.cell-6);
+      // snake
+      ctx.shadowColor='#9bbc0f'; ctx.shadowBlur=6;
+      this.snake.forEach((s,i)=>{
+        ctx.fillStyle = i===0?'#cfe87a':'#9bbc0f';
+        ctx.fillRect(this.ox+s.x*this.cell+1, this.oy+s.y*this.cell+1, this.cell-2, this.cell-2);
+      });
+      ctx.shadowBlur=0;
+      drawParts(this.parts);
+      if(state==='over'){
+        ctx.fillStyle='#0f380f'; ctx.font='bold 14px "Courier New",monospace'; ctx.textAlign='center';
+        ctx.shadowColor='#9bbc0f'; ctx.shadowBlur=4;
+        ctx.fillText('GAME OVER',W/2,90); ctx.shadowBlur=0;
+        ctx.font='bold 9px "Courier New",monospace';
+        ctx.fillText('SCORE:'+this.score,W/2,120);
+        ctx.fillText('PRESS A',W/2,150);
+      }
+      if(state==='paused'){ drawCentered('PAUSED',14); }
+    },
+    onA(){ if(this.over) state='menu'; }
+  };
+
+  function drawCentered(txt,size){
+    ctx.fillStyle='#0f380f'; ctx.font='bold '+size+'px "Courier New",monospace'; ctx.textAlign='center';
+    ctx.shadowColor='#9bbc0f'; ctx.shadowBlur=6;
+    ctx.fillText(txt,W/2,H/2); ctx.shadowBlur=0;
+  }
+
+  function drawText(txt,x,y,size,align){
+    ctx.fillStyle='#0f380f';
+    ctx.font='bold '+size+'px "Courier New",monospace';
+    ctx.textAlign=align||'left';
+    ctx.shadowColor='#9bbc0f';
+    ctx.shadowBlur=4;
+    ctx.fillText(txt,x,y);
+    ctx.shadowBlur=0;
+  }
+
+  // ---------- Menu / Settings draw ----------
+  function drawMenu(){
+    ctx.fillStyle='rgba(15,56,15,0.4)';
+    ctx.fillRect(0,0,W,H);
+    drawText('RETRO ARCADE',W/2,34,14,'center');
+    drawText('SELECT GAME',W/2,58,9,'center');
+    GAMES.forEach((g,i)=>{
+      const y=90+i*34;
+      if(i===menuSel) drawText('> '+g,W/2,y,11,'center');
+      else drawText(g,W/2,y,11,'center');
+    });
+    drawText('A/START:PLAY',W/2,H-34,7,'center');
+    drawText('SELECT:SETTINGS',W/2,H-20,7,'center');
+  }
+
+  function drawSettings(){
+    ctx.fillStyle='rgba(15,56,15,0.4)';
+    ctx.fillRect(0,0,W,H);
+    drawText('SETTINGS',W/2,34,14,'center');
+    const rows=[
+      'POINTS TO WIN: '+PTS[settings.pointsIdx],
+      'SPEED: '+SPEEDS[settings.speedIdx],
+      'DIFFICULTY: '+DIFFS[settings.diffIdx],
+    ];
+    rows.forEach((r,i)=>{
+      const y=80+i*30;
+      if(i===selSetting) drawText('> '+r,W/2,y,9,'center');
+      else drawText(r,W/2,y,9,'center');
+    });
+    drawText('UP/DOWN SELECT  LEFT/RIGHT CHANGE',W/2,H-34,6,'center');
+    drawText('A/B/START:BACK',W/2,H-20,7,'center');
+  }
+
+  function adjustSetting(delta){
+    if(selSetting===0){ settings.pointsIdx=(settings.pointsIdx+delta+PTS.length)%PTS.length; }
+    else if(selSetting===1){ settings.speedIdx=(settings.speedIdx+delta+SPEEDS.length)%SPEEDS.length; }
+    else { settings.diffIdx=(settings.diffIdx+delta+DIFFS.length)%DIFFS.length; }
+    saveSettings();
+  }
+
+  function startGame(name){
+    currentGame=games[name];
+    currentGame.init();
+    state='play';
+    hud.textContent=name;
+  }
+
+  // ---------- Actions ----------
+  function actionA(){
+    if(clickA){ clickA=false; } else { /* keyboard handled below */ }
+  }
+
+  // We'll handle via edge detection in update instead of clicks separately.
+  // But clicks need to trigger; set a flag consumed in update.
+  let clickQueue={a:false,b:false,start:false,select:false};
+  // redefine pulses to fill queue
+  document.getElementById('btnA').onclick=null;
+  // remove previous listeners? they were added; instead override by adding new ones that set queue
+  // Simplest: keep clickA etc and read them in update.
+  
+  function update(){
+    const input=inputState();
+    const jp=justPressed(input,prevInput);
+    // merge clicks
+    if(clickA){ jp.a=true; clickA=false; }
+    if(clickB){ jp.b=true; clickB=false; }
+    if(clickStart){ jp.start=true; clickStart=false; }
+    if(clickSelect){ jp.select=true; clickSelect=false; }
+
+    if(state==='menu'){
+      if(jp.up) menuSel=(menuSel+GAMES.length-1)%GAMES.length;
+      if(jp.down) menuSel=(menuSel+1)%GAMES.length;
+      if(jp.a||jp.start) startGame(GAMES[menuSel]);
+      if(jp.b||jp.select) state='settings';
+    } else if(state==='settings'){
+      if(jp.up) selSetting=(selSetting+2)%3;
+      if(jp.down) selSetting=(selSetting+1)%3;
+      if(jp.left) adjustSetting(-1);
+      if(jp.right) adjustSetting(1);
+      if(jp.a||jp.b||jp.start||jp.select){ state='menu'; saveSettings(); }
+    } else if(state==='over'){
+      if(jp.a||jp.start||jp.b||jp.select){ state='menu'; hud.textContent='RETRO ARCADE'; }
+    } else if(state==='paused'){
+      if(jp.start||jp.a) state='play';
+      if(jp.b||jp.select) { state='menu'; hud.textContent='RETRO ARCADE'; }
+    } else if(state==='play'){
+      currentGame.update(jp,input);
+      if(currentGame.onA && jp.a) currentGame.onA();
+      // pause via start
+      // handled below? Start should pause; but start also used? In play, Enter pauses.
+    }
+    // global pause toggle
+    if(state==='play' && jp.start){ state='paused'; }
+    // update hud default
+    if(state==='menu') hud.textContent='RETRO ARCADE';
+    if(state==='settings') hud.textContent='SETTINGS';
+    if(state==='paused') hud.textContent='PAUSED';
+
+    prevInput=input;
+  }
+
+  function draw(){
+    if(state==='menu') drawMenu();
+    else if(state==='settings') drawSettings();
+    else if(currentGame) currentGame.draw();
+  }
+
+  function loop(){
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
