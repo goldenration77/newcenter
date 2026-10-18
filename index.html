@@ -417,8 +417,8 @@
     });
     requestAnimationFrame(animTrail);
   })();
-
-  const counterEl=document.getElementById('counter');
+//Commenting out dummy Counter for real script in div
+  /*const counterEl=document.getElementById('counter');
   let count=parseInt(localStorage.getItem('pr_hits')||'0',10);
   count++; localStorage.setItem('pr_hits',count);
   const str=String(count).padStart(6,'0');
@@ -426,7 +426,7 @@
     const span=document.createElement('span');
     span.textContent=d; span.style.cssText='background:#003300;color:#00ff00;font-family:"Courier New",monospace;font-size:16px;padding:0 4px;border:1px solid #006600;display:inline-block;';
     counterEl.appendChild(span);
-  });
+  });*/
 
   const navLinks=document.querySelectorAll('.nav-link');
   navLinks.forEach(link=>{
