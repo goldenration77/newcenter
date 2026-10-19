@@ -1,0 +1,31 @@
+{
+  "_readme": [
+    "PixelRanger Media Center - editable catalogue.",
+    "mediacenter.html loads this file at startup; if it is missing or invalid the built-in defaults are used.",
+    "Add your own videos here. platform: youtube | odysee | vimeo | dailymotion | direct | local",
+    "For youtube use the 11 character video id, for odysee use 'claim-id' or '@channel/claim-id'.",
+    "Set demo:true to play the built-in procedural demo tape instead of embedding a real video.",
+    "Change the 'channels' array to point at your real profiles."
+  ],
+  "channels": [
+    { "platform": "youtube", "name": "PixelRanger", "handle": "@PixelRanger", "subs": 184300, "videos": 212, "joined": "2005-03-14", "link": "https://www.youtube.com/@PixelRanger", "color": "#ff0033" },
+    { "platform": "odysee", "name": "PixelRanger", "handle": "@pixelranger:5", "subs": 42300, "videos": 96, "joined": "2020-11-02", "link": "https://odysee.com/@pixelranger:5", "color": "#8b5cf6" },
+    { "platform": "vimeo", "name": "pixelranger", "handle": "vimeo.com/pixelranger", "subs": 12700, "videos": 34, "joined": "2011-07-22", "link": "https://vimeo.com/pixelranger", "color": "#1ab7ea" },
+    { "platform": "dailymotion", "name": "PixelRanger", "handle": "dailymotion.com/PixelRanger", "subs": 6300, "videos": 28, "joined": "2018-02-09", "link": "https://www.dailymotion.com/PixelRanger", "color": "#e8e8e8" },
+    { "platform": "direct", "name": "Archive.org", "handle": "archive.org/details/pixelranger", "subs": 8900, "videos": 41, "joined": "2015-01-30", "link": "https://archive.org", "color": "#c6ff45" }
+  ],
+  "media": [
+    { "id": "mc-01", "platform": "youtube", "vid": "DEMO_YT_001", "title": "NEON DRIFT - Full Speedrun & Final Boss", "cat": "Gameplay", "date": "2024-11-18", "dur": "24:13", "views": 184320, "desc": "My complete run of Neon Drift with the new turbo frame. Frame-perfect input, zero deaths in sector 7.", "tags": ["speedrun", "retro", "neon"], "demo": true },
+    { "id": "mc-02", "platform": "odysee", "vid": "DEMO_OD_002", "title": "Pixel Art Masterclass - Episode 3: Dithering", "cat": "Tutorial", "date": "2024-10-02", "dur": "48:07", "views": 96340, "desc": "A deep dive into dithering techniques for 16-bit style art, filmed at my CRT desk.", "tags": ["tutorial", "pixelart", "art"], "demo": true },
+    { "id": "mc-03", "platform": "youtube", "vid": "DEMO_YT_003", "title": "Building a Homebrew Engine in 72 Hours", "cat": "Devlog", "date": "2024-08-21", "dur": "1:12:45", "views": 412880, "desc": "Day 1 to Day 3 of writing a complete game engine from scratch. Includes the crash at hour 40.", "tags": ["devlog", "engine", "c"], "demo": true },
+    { "id": "mc-04", "platform": "vimeo", "vid": "DEMO_VI_004", "title": "Chiptune Sessions - Vol. 2 (Original Soundtrack)", "cat": "Music", "date": "2024-06-09", "dur": "31:20", "views": 58710, "desc": "Live recorded chiptune set with the TR-909 and a Game Boy. Includes unreleased B-sides.", "tags": ["music", "chiptune", "live"], "demo": true },
+    { "id": "mc-05", "platform": "youtube", "vid": "DEMO_YT_005", "title": "CRT Restoration: Bringing a 1984 Trinitron Back to Life", "cat": "Tech", "date": "2024-04-27", "dur": "16:38", "views": 132640, "desc": "Capacitors, flyback, convergence - the full teardown and repair of a 21 inch Trinitron.", "tags": ["crt", "repair", "retro"], "demo": true },
+    { "id": "mc-06", "platform": "odysee", "vid": "DEMO_OD_006", "title": "LORE OF THE MIDNIGHT ARCADE - Full Documentary", "cat": "Docu", "date": "2024-03-15", "dur": "58:30", "views": 205110, "desc": "A documentary exploring the golden age of arcades and the myths that grew around them.", "tags": ["documentary", "arcade", "history"], "demo": true },
+    { "id": "mc-07", "platform": "youtube", "vid": "DEMO_YT_007", "title": "Every Secret in Green Hill Zone (100% Found)", "cat": "Guide", "date": "2024-02-03", "dur": "22:11", "views": 88904, "desc": "All 42 hidden items, all warps, all the things you missed the first time around.", "tags": ["guide", "secrets", "platformer"], "demo": true },
+    { "id": "mc-08", "platform": "dailymotion", "vid": "DEMO_DM_008", "title": "Making Pixel Art on a 16x16 Canvas - Live Stream VOD", "cat": "Live", "date": "2024-01-12", "dur": "1:44:02", "views": 44920, "desc": "Four hours of live pixel art, chat included. Episode reaches 90 sprites.", "tags": ["livestream", "pixelart", "art"], "demo": true },
+    { "id": "mc-09", "platform": "direct", "vid": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", "title": "Direct MP4 Test - Big Buck Bunny (HTML5 Player)", "cat": "Test", "date": "2023-12-01", "dur": "09:56", "views": 12000, "desc": "A direct .mp4 asset played through the native HTML5 video element - no iframe required.", "tags": ["html5", "test", "direct"] },
+    { "id": "mc-10", "platform": "youtube", "vid": "DEMO_YT_010", "title": "The 2004 Web Design Documentary (Re-Remastered)", "cat": "Docu", "date": "2023-10-31", "dur": "42:09", "views": 301560, "desc": "A re-mastered archive film about the golden age of the personal website.", "tags": ["web", "history", "documentary"], "demo": true },
+    { "id": "mc-11", "platform": "odysee", "vid": "DEMO_OD_011", "title": "Scrolling LED Matrix Sign - Build Tutorial", "cat": "Tutorial", "date": "2023-09-19", "dur": "18:44", "views": 27110, "desc": "Arduino + MAX7219 driver board, wiring diagrams and the scrolling font library.", "tags": ["arduino", "led", "build"], "demo": true },
+    { "id": "mc-12", "platform": "local", "vid": "media/local-tape.mp4", "title": "Local File: Home Movie Reel 1998", "cat": "Archive", "date": "2023-08-04", "dur": "05:12", "views": 3400, "desc": "Scanned home video from 1998, digitised from VHS. Place the file next to this page.", "tags": ["vhs", "family", "archive"] }
+  ]
+}
